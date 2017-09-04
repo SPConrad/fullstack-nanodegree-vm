@@ -101,7 +101,7 @@ class webserverHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         try:
-            if self.path.endswith('/new'):
+            if self.path.endswith("/new"):
                 self.send_response(301)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
@@ -110,20 +110,21 @@ class webserverHandler(BaseHTTPRequestHandler):
                 if ctype == 'multipart/form-data':
                     fields = cgi.parse_multipart(self.rfile, pdict)
                     messagecontent = fields.get('new-restaurant-name')
-                engine = create_engine('sqlite:///restaurantmenu.db')
-                Base.metadata.bind = engine
-                DBSession = sessionmaker(bind = engine)
-                session = DBSession()
+                #engine = create_engine('sqlite:///restaurantmenu.db')
+                #Base.metadata.bind = engine
+                #DBSession = sessionmaker(bind = engine)
+                #session = DBSession()
+                output = ""
+                output += "<html><body>"
+                output += "<h2>Hello /new</h2>"
+                output += "</body></html>"
                 print messageContent
                 print self.request.path
                 print "hello spork"
+                self.wfile.write(output)
                 #restaurant = Restaurant(name = "%s" % self.request.name)
 
-
-
-
-
-        	if self.path.endswith('/hello'):
+        	if self.path.endswith("/hello"):
 	            self.send_response(301)
 	            self.send_header('Content-type', 'text/html')
 	            self.end_headers()
@@ -140,13 +141,20 @@ class webserverHandler(BaseHTTPRequestHandler):
 	            output += "</body></html>"
 	            self.wfile.write(output)
 	            print output
+
         except:
-            pass
+            print self.path
+            print "except"
+            output = ""
+            output += "<html><body>"
+            output += "<h2>Hello /new</h2>"
+            output += "</body></html>"
+            self.wfile.write(output)
 
 def main():
 	try:
 		#bloody everything is on 8080, I want to be able to run this while running other things
-		port = 8079
+		port = 8080
 		# class HTTPServer.HTTPServer(server_address, RequestHandlerClass)
 		# This class builds on the TCPServer class by storing the server address 
 		# as instance variablesnamed server_name and server_port. The server is 
