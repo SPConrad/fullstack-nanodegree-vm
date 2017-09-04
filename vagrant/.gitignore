@@ -1,3 +1,8 @@
 __pycache__
 *.pyc
 .vagrant
+.sql
+*.sql
+**.sql
+/vagrant/*.sql
+vagrant/*.sql
