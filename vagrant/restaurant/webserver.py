@@ -43,7 +43,7 @@ class webserverHandler(BaseHTTPRequestHandler):
                 output += "<h1>Hello!</h1>"
                 output += '''<form method='POST' enctype='multipart/form-data' action='/new'>
 								<h2>Please enter the name of the new restaurant</h2>
-								<input name='new-restaurant-name' type='text'>
+								<input name='newRestaurantName' type='text'>
 								<input type='submit' value='Submit'>
 							</form>'''
                 output += "</body></html>"
@@ -102,14 +102,11 @@ class webserverHandler(BaseHTTPRequestHandler):
     def do_POST(self):
         try:
             if self.path.endswith("/new"):
-                self.send_response(301)
-                self.send_header('Content-type', 'text/html')
-                self.end_headers()
-                ctype, pdict = cgi.parse_header(
-                    self.headers.getheader('content-type'))
-                if ctype == 'multipart/form-data':
-                    fields = cgi.parse_multipart(self.rfile, pdict)
-                    messagecontent = fields.get('new-restaurant-name')
+                #ctype, pdict = cgi.parse_header(
+                #    self.headers.getheader('content-type'))
+                # if ctype == 'multipart/form-data':
+                #     fields = cgi.parse_multipart(self.rfile, pdict)
+                #     messagecontent = fields.get('newRestaurantName')
                 #engine = create_engine('sqlite:///restaurantmenu.db')
                 #Base.metadata.bind = engine
                 #DBSession = sessionmaker(bind = engine)
@@ -120,7 +117,10 @@ class webserverHandler(BaseHTTPRequestHandler):
                 output += "</body></html>"
                 print messageContent
                 print self.request.path
-                print "hello spork"
+                print "hello /new from post /new"
+                self.send_response(301)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
                 self.wfile.write(output)
                 #restaurant = Restaurant(name = "%s" % self.request.name)
 
@@ -147,7 +147,7 @@ class webserverHandler(BaseHTTPRequestHandler):
             print "except"
             output = ""
             output += "<html><body>"
-            output += "<h2>Hello /new</h2>"
+            output += "<h2>Hello /new from except</h2>"
             output += "</body></html>"
             self.wfile.write(output)
 
