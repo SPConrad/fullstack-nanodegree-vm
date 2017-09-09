@@ -51,8 +51,6 @@ class webserverHandler(BaseHTTPRequestHandler):
                 print output
                 return   
 
-
-
             if self.path.endswith("/edit"):
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
@@ -115,41 +113,17 @@ class webserverHandler(BaseHTTPRequestHandler):
                 output += "<html><body>"
                 output += "<h2>Hello /new</h2>"
                 output += "</body></html>"
-                print messageContent
+                #print messageContent
                 print self.request.path
                 print "hello /new from post /new"
-                self.send_response(301)
+                self.send_response(201)
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 self.wfile.write(output)
                 #restaurant = Restaurant(name = "%s" % self.request.name)
 
-        	if self.path.endswith("/hello"):
-	            self.send_response(301)
-	            self.send_header('Content-type', 'text/html')
-	            self.end_headers()
-	            ctype, pdict = cgi.parse_header(
-	                self.headers.getheader('content-type'))
-	            if ctype == 'multipart/form-data':
-	                fields = cgi.parse_multipart(self.rfile, pdict)
-	                messagecontent = fields.get('message')
-	            output = ""
-	            output += "<html><body>"
-	            output += " <h2> Okay, how about this: </h2>"
-	            output += "<h1> %s </h1>" % messagecontent[0]
-	            output += '''<form method='POST' enctype='multipart/form-data' action='/hello'><h2>What would you like me to say?</h2><input name="message" type="text" ><input type="submit" value="Submit"> </form>'''
-	            output += "</body></html>"
-	            self.wfile.write(output)
-	            print output
-
         except:
-            print self.path
-            print "except"
-            output = ""
-            output += "<html><body>"
-            output += "<h2>Hello /new from except</h2>"
-            output += "</body></html>"
-            self.wfile.write(output)
+            self.send_error(404, 'Unable to add new restaurant: %s' % self.path)
 
 def main():
 	try:

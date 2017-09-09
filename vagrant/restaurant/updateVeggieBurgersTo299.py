@@ -13,3 +13,8 @@ for veggieBurger in veggieBurgers:
 		veggieBurger.price = '$2.99'
 		session.add(veggieBurger)
 		session.commit()
+
+
+
+for restaurant in restaurants:
+	print restaurant.id
