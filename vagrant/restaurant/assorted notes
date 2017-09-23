@@ -1,0 +1,40 @@
+Udacity feedback:
+
+Lesson 7 - 3:
+Should have links to definitions and/or examples of HTTP verbs
+
+
+Lesson 7 - 12: Quiz: CRUD Objectives should be a project with feedback
+
+
+
+
+
+
+CGI = Common Gateway Library
+
+
+
+TCP = transmission control protocol
+
+IP = Internet Protocol
+
+HTTP = HyperText Transfer Protocol 
+
+
+HTTP Verbs: 
+* GET 
+* POST
+* 
+* 
+* 
+* 
+* 
+* 
+
+
+
+200 = successful GET request
+
+301 = successful POST request
+

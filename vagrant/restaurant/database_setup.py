@@ -46,11 +46,16 @@ class MenuItem(Base):
 
 	restaurant = relationship(Restaurant)
 
-
-
-
-
-
+	@property
+	def serialize(self):
+    	# Returns object data in easily serializeable format
+		return {
+			'name' : self.name,
+			'description' : self.description,
+			'id' : self.id,
+			'price' : self.price,
+			'course' : self.course
+	}
 
 
 #########goes at the end of the file#########

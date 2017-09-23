@@ -1,0 +1,51 @@
+db setup
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+from database_setup import Base, Restaurant, MenuItem
+engine = create_engine('sqlite:///restaurantmenu.db')
+Base.metadata.bind = engine
+DBSession = sessionmaker(bind = engine)
+session = DBSession()
+
+
+
+
+
+
+output += '''
+
+<form method='POST' enctype='multipart/form-data' action='/hello'>
+	<h2>What would you like me to say?</h2>
+	<input name="message" type="text">
+	<input type="submit" value="Submit"> 
+</form>'''
+
+
+<form method='POST' enctype='multipart/form-data' action='/new'>
+	<h2>Please enter the name of the new restaurant</h2>
+	<input name='new-restaurant-name' type='text'>
+	<input type='submit' value='Submit'>
+</form>
+
+
+
+
+def do_POST(self):
+        try:
+            if self.path.endswith("/restaurants/new"):
+                ctype, pdict = cgi.parse_header(
+                    self.headers.getheader('content-type'))
+                if ctype == 'multipart/form-data':
+                    fields = cgi.parse_multipart(self.rfile, pdict)
+                    messagecontent = fields.get('newRestaurantName')
+
+                    # Create new Restaurant Object
+                    newRestaurant = Restaurant(name=messagecontent[0])
+                    session.add(newRestaurant)
+                    session.commit()
+
+                    self.send_response(301)
+                    self.send_header('Content-type', 'text/html')
+                    self.send_header('Location', '/restaurants')
+                    self.end_headers()
