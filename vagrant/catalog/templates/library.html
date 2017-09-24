@@ -1,0 +1,54 @@
+{% extends "main.html" %}
+{% block content %}
+{% include "header.html" %}
+    <div class="row divider green">
+        <div class="col-md-12">
+        </div>
+    </div>
+    <div class="row banner menu">
+        <div class="col-md-11 col-md-offset-1 padding-none">
+            <h1>{{ platform.name }}</h1>
+            <!-- creator stuff goes here -->
+    </div>
+    <div class = 'flash'>
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <ul>
+                {% for message in messages %}
+                    <li> 
+                        <strong> 
+                            {{ message }} 
+                        </strong> 
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% endwith %}
+    </div>
+
+    <div class="row padding-top padding-bottom">
+        <div class="col-md-11"></div>
+        <div class="col-md-11 padding-none">
+            <!-- edit Platform, add new game -->
+        <div class="col-md-7">
+    </div>
+
+    {% if games !=[] %}
+        <div class="row">
+            <!-- Could add sort/filter by publisher, genre, year of release -->
+            <div class="col-md-1"></div>
+            <div class="col-md-6">
+                <h2>Games</h2>
+                {% for g in games %}
+                    <div class="game">
+                        <h3>{{g.title}}</h3>
+                        <p>{{g.developer}}</p>
+                        <p>{{g.publisher}}</p>
+                        <p>{{g.releasedate}}</p>
+                        <!--on the full list, can add platform here-->
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

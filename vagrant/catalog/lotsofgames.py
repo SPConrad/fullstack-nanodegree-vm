@@ -1,7 +1,8 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
+import datetime
 
-from models import User, Platform, Game
+from models import Base, User, Platform, Game
 
 engine = create_engine('sqlite:///catalog-app.db')
 # Bind the engine to the metadata of the Base class so that the
@@ -18,34 +19,47 @@ DBSession = sessionmaker(bind=engine)
 # session.rollback()
 session = DBSession()
 
-platform1 = Platform(user_id=1, name='Playstation', manufacturer='Sony', release_date='1994-12-03')
+User1 = User(id=1, username='rebornpastafarian', password_hash='sporksandorks')
+User2 = User(id=2, username='voltaspistol', password_hash='sporksandorks')
+User3 = User(id=3, username='kandoras', password_hash='notapaladin')
+
+session.add(User1)
+session.commit()
+
+session.add(User2)
+session.commit()
+
+session.add(User3)
+session.commit()
+
+platform1 = Platform(id=1, user_id=1, name='Playstation', manufacturer='Sony', release_date=datetime.date(1994, 12, 3))
 
 session.add(platform1)
 session.commit()
 
-game1 = Game(user_id=1, name='Metal Gear Solid', developer='Konami Computer Entertainment Japan', 
-    publisher='Konami', platform=1, release_date='1996-12-03')
+game1 = Game(user_id=1, title='Metal Gear Solid', developer='Konami Computer Entertainment Japan', 
+    publisher='Konami', platform_id=1, release_date=datetime.date(1996, 12, 3))
 
 session.add(game1)
 
 session.commit()
 
-game2 = Game(user_id=1, name='Gran Turismo', developer='Polys Entertainment', 
-    publisher='Sony Computer Entertainment', platform=1, release_date='1998-09-03')
+game2 = Game(user_id=1, title='Gran Turismo', developer='Polys Entertainment', 
+    publisher='Sony Computer Entertainment', platform_id=1, release_date=datetime.date(1998, 9, 3))
 
 session.add(game2)
 
 session.commit()
 
-game3 = Game(user_id=1, name='Resident Evil 2', developer='Capcom', publisher='Capcom', 
-    platform=1, release_date='1998-01-21')
+game3 = Game(user_id=1, title='Resident Evil 2', developer='Capcom', publisher='Capcom', 
+    platform_id=1, release_date=datetime.date(1998, 01, 21))
 
 session.add(game3)
 
 session.commit()
 
-game4 = Game(user_id=1, name='Tekken 3', developer='Namco', publisher='Namco Hometek', 
-    platform=1, release_date='1998-04-29')
+game4 = Game(user_id=1, title='Tekken 3', developer='Namco', publisher='Namco Hometek', 
+    platform_id=1, release_date=datetime.date(1998, 04, 29))
 
 session.add(game4)
 

@@ -74,7 +74,7 @@ class Game(Base):
     release_date = Column(Date)
     developer = Column(String(250))
     publisher = Column(String(250))
-    platform = Column(String(250), ForeignKey('platform.id'))
+    platform_id = Column(String(250), ForeignKey('platform.id'))
     created = Column(Date, default=_get_date)
     updated = Column(Date, onupdate=_get_date)
     user_id = Column(Integer, ForeignKey('user.id'))
