@@ -37,29 +37,35 @@ platform1 = Platform(id=1, user_id=1, name='Playstation', manufacturer='Sony', r
 session.add(platform1)
 session.commit()
 
+platform2 = Platform(id=2, user_id=1, name='Nintendo 64', manufacturer='Nintendo', release_date=datetime.date(1996, 9, 26))
+
+session.add(platform2)
+session.commit()
+
+
 game1 = Game(user_id=1, title='Metal Gear Solid', developer='Konami Computer Entertainment Japan', 
-    publisher='Konami', platform_id=1, release_date=datetime.date(1996, 12, 3))
+    publisher='Konami', platform=1, release_date=datetime.date(1996, 12, 3))
 
 session.add(game1)
 
 session.commit()
 
 game2 = Game(user_id=1, title='Gran Turismo', developer='Polys Entertainment', 
-    publisher='Sony Computer Entertainment', platform_id=1, release_date=datetime.date(1998, 9, 3))
+    publisher='Sony Computer Entertainment', platform=1, release_date=datetime.date(1998, 9, 3))
 
 session.add(game2)
 
 session.commit()
 
 game3 = Game(user_id=1, title='Resident Evil 2', developer='Capcom', publisher='Capcom', 
-    platform_id=1, release_date=datetime.date(1998, 01, 21))
+    platform=1, release_date=datetime.date(1998, 01, 21))
 
 session.add(game3)
 
 session.commit()
 
 game4 = Game(user_id=1, title='Tekken 3', developer='Namco', publisher='Namco Hometek', 
-    platform_id=1, release_date=datetime.date(1998, 04, 29))
+    platform=1, release_date=datetime.date(1998, 04, 29))
 
 session.add(game4)
 

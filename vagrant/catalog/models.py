@@ -57,7 +57,7 @@ class Platform(Base):
     user = relationship(User)
 
     @property
-    def serialze(self):
+    def serialize(self):
         """Return object data in easily serializeable format"""
         return {
         'name' : self.name,
@@ -74,7 +74,7 @@ class Game(Base):
     release_date = Column(Date)
     developer = Column(String(250))
     publisher = Column(String(250))
-    platform_id = Column(String(250), ForeignKey('platform.id'))
+    platform = Column(String(250), ForeignKey('platform.id'))
     created = Column(Date, default=_get_date)
     updated = Column(Date, onupdate=_get_date)
     user_id = Column(Integer, ForeignKey('user.id'))
@@ -88,7 +88,8 @@ class Game(Base):
         'id' : self.id,
         'publisher' : self.publisher,
         'developer' : self.developer,
-        'release_date' : self.release_date
+        'release_date' : self.release_date,
+        'platform' : self.platform
     }
 
 
