@@ -20,6 +20,7 @@ class User(Base):
 
     id = Column(Integer, primary_key=True)
     username = Column(String(32), index=True)
+    email = Column(String(32))
     password_hash = Column(String(64))
 
     def hash_password(self, password):
@@ -43,6 +44,13 @@ class User(Base):
             return None
         user_id = data['id']
         return user_id
+
+    @property
+    def serialize(self):
+        return {
+        'username' : self.username,
+        'id' : self.id
+    }
 
 class Platform(Base):
     __tablename__ = 'platform'
@@ -74,7 +82,7 @@ class Game(Base):
     release_date = Column(Date)
     developer = Column(String(250))
     publisher = Column(String(250))
-    platform = Column(String(250), ForeignKey('platform.id'))
+    platform_id = Column(String(250), ForeignKey('platform.id'))
     created = Column(Date, default=_get_date)
     updated = Column(Date, onupdate=_get_date)
     user_id = Column(Integer, ForeignKey('user.id'))
@@ -89,7 +97,7 @@ class Game(Base):
         'publisher' : self.publisher,
         'developer' : self.developer,
         'release_date' : self.release_date,
-        'platform' : self.platform
+        'platform_id' : self.platform
     }
 
 

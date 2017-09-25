@@ -48,6 +48,51 @@ def platformsJSON():
     platforms = session.query(Platform).all()
     return jsonify(platforms=[i.serialize for i in platforms])
 
+@app.route('/users/JSON')
+def usersJSON():
+    users = session.query(User).all()
+    return jsonify(platforms=[i.serialize for i in users])
+
+#DELETE PLATFORM
+
+# VIEW PLATFORM LIBRARY
+@app.route('/platform/<int:platform_id>/')
+@app.route('/platform/<int:platform_id>/library/')
+def showPlatformLibrary(platform_id):
+    platform = session.query(Platform).filter_by(id=platform_id).one()
+    games = session.query(Game).filter_by(
+        platform_id=platform_id).all()
+    #if login_session['user_id'] == platform.user_id:
+    return render_template('library.html', games=games, platform=platform)
+    # else:
+    #     creator = session.query(User).filter_by(id=platform.user_id).one()
+    #     return render_template('publiclibrary.html', games=games, platform=platform, creator=creator)
+
+
+
+# VIEW LIST OF PLATFORMS
+@app.route('/')
+@app.route('/platform/')
+def showPlatforms():
+    platforms = session.query(Platform).all()
+    return render_template('platformlist.html', platforms=platforms)
+
+# ADD A NEW PLATFORM
+@app.route('/platform/new/', methods=['GET', 'POST'])
+def addPlatform():
+    if 'username' not in login_session:
+        return redirect('/login')
+    if request.method == 'POST':
+        print 'newPlatform'
+        newPlatform = Platform(
+            name='New Platform', user_id=100,released=datetime.date(1990, 1, 1), manufacturer='WillowTree'
+        )
+        flash('Creating new platform')
+        session.commit()
+        return redirect(url_for('showPlatforms'))
+    else:
+        return render_template('addPlatform.html')
+
 # EDIT PLATFORM
 @app.route('/platform/<int:platform_id>/edit/', methods=['GET', 'POST'])
 def editPlatform(platform_id):
@@ -63,46 +108,45 @@ def editPlatform(platform_id):
     else:
         return render_template('editPlatform.html', platform=editedPlatform)
     
-
-#DELETE PLATFORM
-
-# VIEW PLATFORM LIBRARY
-@app.route('/platform/<int:platform_id>/')
-@app.route('/platform/<int:platform_id>/library/')
-def showPlatformLibrary(platform_id):
-    platform = session.query(Platform).filter_by(id=platform_id).one()
-    games = session.query(Game).filter_by(
-        platform_id=platform_id).all()
-    if login_session['user_id'] == platform.user_id:
-        return render_template('library.html', games=games, platform=platform)
-    else:
-        creator = session.query(User).filter_by(id=platform.user_id).one()
-        return render_template('publiclibrary.html', games=games, platform=platform, creator=creator)
-
-
-
-# VIEW LIST OF PLATFORMS
-@app.route('/')
-@app.route('/platform/')
-def showPlatforms():
-    platforms = session.query(Platform).all()
-    return render_template('platformlist.html', platforms=platforms)
-
-@app.route('/platform/new/', methods=['GET', 'POST'])
-def addPlatform():
+# DELETE PLATFORM
+@app.route('/platform/<int:platform_id>/delete/', methods=['GET', 'POST'])
+def deletePlatform(platform_id):
     if 'username' not in login_session:
         return redirect('/login')
-    if request.method == 'POST':
-        print 'newPlatform'
-        newPlatform = Platform(
-            name='New Platform', user_id=100,released=Datetime.date(1990, 1, 1), manufacturer='WillowTree'
-        )
-        flash('Creating new platform')
-        session.commit()
-        return redirect(url_for('showPlatforms'))
+    platformToDelete = session.query(
+        Platform).filter_by(id=platform_id).one()
+    if login_session['user_id'] == platformToDelete.user_id:   
+        if request.method == 'POST':
+            session.delete(platformToDelete)
+            flash('%s Successfully Deleted' % platformToDelete.name)
+            session.commit()
+            return redirect(url_for('showPlatforms', platform_id=platform_id))
+        else:
+            return render_template('deletePlatform.html', platform=platformToDelete)
     else:
-        return render_tempalte('addPlatform.html')
-#MAIN CATALOG VIEW
+        return redirect(url_for('showMenu', platform_id=platform_id))
+
+#@app.route('/addgame/')
+@app.route('/platform/<int:platform_id>/addgame/')
+def addGame(platform_id):
+    if 'username' not in login_session:
+        print "username not in login sessions"
+        return redirect('/login')
+    platform = session.query(Platform).filter_by(id=platform_id).one()
+    if login_session['user_id'] == platform.user_id:
+        if request.method == 'POST':
+            newGame = Game(title=request.form['title'], developer=request.form['developer'], publisher=request.form[
+                            'publisher'], releasedate=request.form['releasedate'], platform_id=platform.id, user_id=platform.user_id)
+            session.add(newGame)
+            session.commit()
+            flash('New Game - %s Successfully Created' % (newGame.name))
+            return redirect(url_for('showPlatforms', platform_id=platform_id))
+        else:
+            return render_template('newgame.html', platform_id=platform_id)
+    else:
+        flash('You do not have authorization to access this page')
+        return redirect(url_for('showPlatforms', platform_id=platform_id))
+
 
 #/catalog/category/sub_category
 #details for that subcategory
@@ -124,88 +168,6 @@ def showLogin():
     # return "The current session state is %s" % login_session['state']
     return render_template('login.html', STATE=state)
 
-@app.route('/fbconnect', methods=['POST'])
-def fbconnect():
-    if request.args.get('state') != login_session['state']:
-        response = make_response(json.dumps('Invalid state parameter.'), 401)
-        response.headers['Content-Type'] = 'application/json'
-        return response
-    access_token = request.data
-    print "access token received %s " % access_token
-
-
-    app_id = json.loads(open('fb_client_secret.json', 'r').read())[
-        'web']['app_id']
-    app_secret = json.loads(
-        open('fb_client_secret.json', 'r').read())['web']['app_secret']
-    url = 'https://graph.facebook.com/oauth/access_token?grant_type=fb_exchange_token&client_id=%s&client_secret=%s&fb_exchange_token=%s' % (
-        app_id, app_secret, access_token)
-    h = httplib2.Http()
-    result = h.request(url, 'GET')[1]
-
-
-    # Use token to get user info from API
-    userinfo_url = "https://graph.facebook.com/v2.8/me"
-    '''
-        Due to the formatting for the result from the server token exchange we have to
-        split the token first on commas and select the first index which gives us the key : value
-        for the server access token then we split it on colons to pull out the actual token value
-        and replace the remaining quotes with nothing so that it can be used directly in the graph
-        api calls
-    '''
-    token = result.split(',')[0].split(':')[1].replace('"', '')
-
-    url = 'https://graph.facebook.com/v2.8/me?access_token=%s&fields=name,id,email' % token
-    h = httplib2.Http()
-    result = h.request(url, 'GET')[1]
-    # print "url sent for API access:%s"% url
-    # print "API JSON result: %s" % result
-    data = json.loads(result)
-    login_session['provider'] = 'facebook'
-    login_session['username'] = data["name"]
-    login_session['email'] = data["email"]
-    login_session['facebook_id'] = data["id"]
-
-    # The token must be stored in the login_session in order to properly logout
-    login_session['access_token'] = token
-
-    # Get user picture
-    url = 'https://graph.facebook.com/v2.8/me/picture?access_token=%s&redirect=0&height=200&width=200' % token
-    h = httplib2.Http()
-    result = h.request(url, 'GET')[1]
-    data = json.loads(result)
-
-    login_session['picture'] = data["data"]["url"]
-
-    # see if user exists
-    user_id = getUserID(login_session['email'])
-    if not user_id:
-        user_id = createUser(login_session)
-    login_session['user_id'] = user_id
-
-    output = ''
-    output += '<h1>Welcome, '
-    output += login_session['username']
-
-    output += '!</h1>'
-    output += '<img src="'
-    output += login_session['picture']
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
-
-    flash("Now logged in as %s" % login_session['username'])
-    return output
-
-
-
-@app.route('/fbdisconnect')
-def fbdisconnect():
-    facebook_id = login_session['facebook_id']
-    # The access token must me included to successfully logout
-    access_token = login_session['access_token']
-    url = 'https://graph.facebook.com/%s/permissions?access_token=%s' % (facebook_id,access_token)
-    h = httplib2.Http()
-    result = h.request(url, 'DELETE')[1]
-    return "you have been logged out"
 
 @app.route('/gconnect', methods=['POST'])
 def gconnect():
@@ -242,8 +204,8 @@ def gconnect():
 
     # Verify that the access token is used for the intended user.
     gplus_id = credentials.id_token['sub']
-    print "if result['user_id'] != gplus_id:"
     if result['user_id'] != gplus_id:
+        print "result['user_id'] != gplus_id:"
         response = make_response(
             json.dumps("Token's user ID doesn't match given user ID."), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -277,7 +239,6 @@ def gconnect():
     data = answer.json()
     login_session['provider'] = 'google'
     login_session['username'] = data['name']
-    login_session['picture'] = data['picture']
     login_session['email'] = data['email']
 
     # See if a user exists, if it doesn't make a new one
@@ -299,7 +260,6 @@ def gconnect():
     output += login_session['username']
     output += '!</h1>'
     output += '<img src="'
-    output += login_session['picture']
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
@@ -308,8 +268,7 @@ def gconnect():
 # User Helper Functions
 
 def createUser(login_session):
-    newUser = User(name=login_session['username'], email=login_session[
-                   'email'], picture=login_session['picture'])
+    newUser = User(username=login_session['username'], email=login_session['email'])
     session.add(newUser)
     session.commit()
     user = session.query(User).filter_by(email=login_session['email']).one()
@@ -349,7 +308,6 @@ def gdisconnect():
         del login_session['gplus_id']
         del login_session['username']
         del login_session['email']
-        del login_session['picture']
 
         response = make_response(json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
