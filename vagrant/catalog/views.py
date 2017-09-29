@@ -126,6 +126,8 @@ def deletePlatform(platform_id):
     else:
         return redirect(url_for('showMenu', platform_id=platform_id))
 
+
+
 #@app.route('/addgame/')
 @app.route('/platform/<int:platform_id>/addgame/')
 def addGame(platform_id):
@@ -142,10 +144,32 @@ def addGame(platform_id):
             flash('New Game - %s Successfully Created' % (newGame.name))
             return redirect(url_for('showPlatforms', platform_id=platform_id))
         else:
-            return render_template('newgame.html', platform_id=platform_id)
+            return render_template('addgame.html', platform_id=platform_id)
     else:
         flash('You do not have authorization to access this page')
         return redirect(url_for('showPlatforms', platform_id=platform_id))
+
+@app.route('/platform/<int:platform_id>/editgame/<int:game_id>/', methods=['GET', 'POST'])
+def editGame(game_id):
+    if 'username' not in login_session:
+        print "username not in login session"
+        return redirect('/login')
+    editedGame = session.query(Game).filter_by(id=game_id).one()
+    platform = session.query(Platform).filter_by(id=editedGame.platform_id).one()
+    if login_session['user_id'] == platform.user_id:
+        if request.method == 'POST':
+            editedGame.name = request.form['name']
+            editedGame.developer = request.form['developer']
+            editedGame.publisher = request.form['publisher']
+            editedGame.releasedate = request.form['releasedate']
+            editedGame.platform = platform.id
+            flash('Game edited successfully')
+            return redirect(url_for(showPlatformLibrary(platform.id)))
+        else: 
+            return render_template('editgame.html', game=game_id)
+    else:
+        return redirect(url_for(showPlatformLibrary(platform.id)))
+            
 
 
 #/catalog/category/sub_category
