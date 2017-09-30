@@ -89,15 +89,15 @@ class Game(Base):
     user = relationship(User)
 
     @property
-    def serialze(self):
+    def serialize(self):
         """Return object data in easily serializeable format"""
         return {
-        'name' : self.name,
+        'name' : self.title,
         'id' : self.id,
         'publisher' : self.publisher,
         'developer' : self.developer,
         'release_date' : self.release_date,
-        'platform_id' : self.platform
+        'platform_id' : self.platform_id
     }
 
 

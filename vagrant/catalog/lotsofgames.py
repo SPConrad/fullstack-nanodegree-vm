@@ -30,7 +30,7 @@ session.commit()
 session.add(User3)
 session.commit()
 
-platform1 = Platform(id=1, user_id=4, name='Playstation', manufacturer='Sony', release_date=datetime.date(1994, 12, 3))
+platform1 = Platform(id=1, user_id=1, name='Playstation', manufacturer='Sony', release_date=datetime.date(1994, 12, 3))
 
 session.add(platform1)
 session.commit()
@@ -64,7 +64,7 @@ session.add(game4)
 session.commit()
 
 
-platform2 = Platform(id=2, user_id=4, name='Nintendo 64', manufacturer='Nintendo', release_date=datetime.date(1996, 9, 26))
+platform2 = Platform(id=2, user_id=1, name='Nintendo 64', manufacturer='Nintendo', release_date=datetime.date(1996, 9, 26))
 
 session.add(platform2)
 session.commit()

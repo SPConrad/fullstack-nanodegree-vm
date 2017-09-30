@@ -37,7 +37,7 @@ def platformLibraryJSON(platform_id):
     return jsonify(GameList=[i.serialize for i in games])
     
 # GET JSON FOR SINGLE GAME
-@app.route('/platform/<int:platform_id>/library/<int:game_id>/JSON')
+@app.route('/library/<int:game_id>/JSON')
 def gameJSON(game_id):
     game = session.query(Game).filter_by(id=game_id).one()
     return jsonify(Game=game.serialize)
@@ -72,7 +72,7 @@ def showPlatformLibrary(platform_id):
 
 # VIEW LIST OF PLATFORMS
 @app.route('/')
-@app.route('/platform/')
+@app.route('/platforms/')
 def showPlatforms():
     platforms = session.query(Platform).all()
     return render_template('platformlist.html', platforms=platforms)
@@ -84,14 +84,24 @@ def addPlatform():
         return redirect('/login')
     if request.method == 'POST':
         print 'newPlatform'
+        input_date = request.form['releasedate'].split('-')
+        year = int(input_date[0])
+        month = int(input_date[1])
+        day = int(input_date[2])
+        
+        release_date = datetime.date(year, month, day)
         newPlatform = Platform(
-            name='New Platform', user_id=100,released=datetime.date(1990, 1, 1), manufacturer='WillowTree'
+            name= request.form['name'], 
+            user_id= login_session['user_id'],
+            release_date= release_date, 
+            manufacturer= request.form['manufacturer']
         )
         flash('Creating new platform')
+        session.add(newPlatform)
         session.commit()
         return redirect(url_for('showPlatforms'))
     else:
-        return render_template('addPlatform.html')
+        return render_template('addplatform.html')
 
 # EDIT PLATFORM
 @app.route('/platform/<int:platform_id>/edit/', methods=['GET', 'POST'])
@@ -103,8 +113,14 @@ def editPlatform(platform_id):
     if request.method == 'POST':
         if request.form['name']:
             editedPlatform.name = request.form['name']
+            editedPlatform.manufacturer = request.form['manufactuer']
+            editedPlatform.releasedate = request.form['releasedate']
+            session.add(editedPlatform)
+            session.commit()
             flash('Platform successfully edited %s' % editedPlatform.name)
             return redirect(url_for('showPlatforms'))
+        else: 
+            return render_template('editPlatform.html', game=editedGame)
     else:
         return render_template('editPlatform.html', platform=editedPlatform)
     
@@ -150,7 +166,7 @@ def addGame(platform_id):
         return redirect(url_for('showPlatforms', platform_id=platform_id))
 
 @app.route('/platform/<int:platform_id>/editgame/<int:game_id>/', methods=['GET', 'POST'])
-def editGame(game_id):
+def editGame(platform_id, game_id):
     if 'username' not in login_session:
         print "username not in login session"
         return redirect('/login')
@@ -158,17 +174,19 @@ def editGame(game_id):
     platform = session.query(Platform).filter_by(id=editedGame.platform_id).one()
     if login_session['user_id'] == platform.user_id:
         if request.method == 'POST':
-            editedGame.name = request.form['name']
+            editedGame.title = request.form['title']
             editedGame.developer = request.form['developer']
             editedGame.publisher = request.form['publisher']
-            editedGame.releasedate = request.form['releasedate']
-            editedGame.platform = platform.id
+            #editedGame.releasedate = request.form['releasedate']
+            editedGame.platform = request.form['platform_id']
+            session.add(editedGame)
+            session.commit()
             flash('Game edited successfully')
-            return redirect(url_for(showPlatformLibrary(platform.id)))
+            return redirect(url_for('showPlatformLibrary', platform_id=platform_id))
         else: 
-            return render_template('editgame.html', game=game_id)
+            return render_template('editgame.html', game=editedGame)
     else:
-        return redirect(url_for(showPlatformLibrary(platform.id)))
+        return redirect(url_for('showPlatformLibrary', platform_id=platform_id))
             
 
 
