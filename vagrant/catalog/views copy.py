@@ -1,15 +1,12 @@
 from models import Base, User, Game, Platform
-from flask import Flask, make_response, jsonify, request
-from flask import url_for, abort, render_template, g, flash, redirect
+from flask import Flask, make_response, jsonify, request, url_for, abort, render_template, g, flash, redirect
 from flask import session as login_session
 from flask_httpauth import HTTPBasicAuth
 
 from sqlalchemy import create_engine, asc
 from sqlalchemy.orm import sessionmaker
 
-import random
-import string
-import datetime
+import random, string, datetime
 
 from oauth2client.client import flow_from_clientsecrets
 from oauth2client.client import FlowExchangeError
@@ -32,8 +29,6 @@ CLIENT_ID = json.loads(
 APPLICATION_NAME = "Game Catalog"
 
 # GET JSON FOR ALL GAMES IN A PLATFORM'S LIBRARY
-
-
 @app.route('/platform/<int:platform_id>/library/JSON')
 def platformLibraryJSON(platform_id):
     platform = session.query(Platform).filter_by(id=platform_id).one()
@@ -42,45 +37,37 @@ def platformLibraryJSON(platform_id):
     return jsonify(GameList=[i.serialize for i in games])
 
 # GET JSON FOR SINGLE GAME
-
-
 @app.route('/library/<int:game_id>/JSON')
 def gameJSON(game_id):
     game = session.query(Game).filter_by(id=game_id).one()
     return jsonify(Game=game.serialize)
 
 # GET JSON OF ALL PLATFORMS IN DB
-
-
 @app.route('/platform/JSON')
 def platformsJSON():
     platforms = session.query(Platform).all()
     return jsonify(platforms=[i.serialize for i in platforms])
-
 
 @app.route('/users/JSON')
 def usersJSON():
     users = session.query(User).all()
     return jsonify(platforms=[i.serialize for i in users])
 
-# DELETE PLATFORM
+#DELETE PLATFORM
 
 # VIEW PLATFORM LIBRARY
-
-
 @app.route('/platform/<int:platform_id>/')
 @app.route('/platform/<int:platform_id>/library/')
 def showPlatformLibrary(platform_id):
     platform = session.query(Platform).filter_by(id=platform_id).one()
     games = session.query(Game).filter_by(
         platform_id=platform_id).all()
-    # if login_session['user_id'] == platform.user_id:
+    #if login_session['user_id'] == platform.user_id:
     return render_template('library.html', games=games, platform=platform)
     # else:
-    # TODO
     #     creator = session.query(User).filter_by(id=platform.user_id).one()
-    #     return render_template('publiclibrary.html', games=games,
-    #     platform=platform, creator=creator)
+    #     return render_template('publiclibrary.html', games=games, platform=platform, creator=creator)
+
 
 
 # VIEW LIST OF PLATFORMS
@@ -88,13 +75,9 @@ def showPlatformLibrary(platform_id):
 @app.route('/platforms/')
 def showPlatforms():
     platforms = session.query(Platform).all()
-    for item in login_session:
-        print "%s - %s" % (item, login_session[item])
     return render_template('platformlist.html', platforms=platforms)
 
 # ADD A NEW PLATFORM
-
-
 @app.route('/platform/new/', methods=['GET', 'POST'])
 def addPlatform():
     checkIfUserLoggedIn()
@@ -104,15 +87,15 @@ def addPlatform():
         input_date = request.form['releasedate'].split('-')
         year = int(input_date[0])
         month = int(input_date[1])
-        day = int(input_date[2])
+        day = int(input_date[2])        
         release_date = datetime.date(year, month, day)
 
         # create the new Platform object
         newPlatform = Platform(
-            name=request.form['name'],
-            user_id=login_session['user_id'],
-            release_date=release_date,
-            manufacturer=request.form['manufacturer']
+            name= request.form['name'], 
+            user_id= login_session['user_id'],
+            release_date= release_date, 
+            manufacturer= request.form['manufacturer']
         )
         flash('Creating new platform')
 
@@ -126,8 +109,6 @@ def addPlatform():
         return render_template('addplatform.html')
 
 # EDIT PLATFORM
-
-
 @app.route('/platform/<int:platform_id>/edit/', methods=['GET', 'POST'])
 def editPlatform(platform_id):
     checkIfUserLoggedIn()
@@ -139,48 +120,43 @@ def editPlatform(platform_id):
                 input_date = request.form['releasedate'].split('-')
                 year = int(input_date[0])
                 month = int(input_date[1])
-                day = int(input_date[2])
+                day = int(input_date[2])        
                 release_date = datetime.date(year, month, day)
                 editedPlatform.name = request.form['name']
                 editedPlatform.manufacturer = request.form['manufactuer']
-                # TODO - ADD OTHER FIELDS
+                #TODO - ADD OTHER FIELDS
                 editedPlatform.releasedate = release_date
                 session.add(editedPlatform)
                 session.commit()
                 flash('Platform successfully edited %s' % editedPlatform.name)
                 return redirect(url_for('showPlatforms'))
-        else:
-            return render_template('editPlatform.html',
-                                   platform=editedPlatform)
+        else: 
+            return render_template('editPlatform.html', platform=editedPlatform)
     else:
-        flash('Sorry, you do not have the proper permissions to edit \
-                that platform')
+        flash('Sorry, you do not have the proper permissions to edit that platform')
         return redirect(url_for('showPlatforms'))
-
+    
 # DELETE PLATFORM
-
-
 @app.route('/platform/<int:platform_id>/delete/', methods=['GET', 'POST'])
 def deletePlatform(platform_id):
     checkIfUserLoggedIn()
     platformToDelete = session.query(
         Platform).filter_by(id=platform_id).one()
     if request.method == 'POST':
-        if login_session['user_id'] == platformToDelete.user_id:
+        if login_session['user_id'] == platformToDelete.user_id:   
             if request.method == 'POST':
                 session.delete(platformToDelete)
                 flash('%s Successfully Deleted' % platformToDelete.name)
                 session.commit()
-                return redirect(url_for('showPlatforms',
-                                        platform_id=platform_id))
+                return redirect(url_for('showPlatforms', platform_id=platform_id))
             else:
-                return redirect(url_for('showPlatforms',
-                                        platform_id=platform_id))
+                return redirect(url_for('showPlatforms', platform_id=platform_id))
     else:
-        return render_template('deletePlatform.html',
-                               platform=platformToDelete)
+                return render_template('deletePlatform.html', platform=platformToDelete)
 
 
+
+#@app.route('/addgame/')
 @app.route('/platform/<int:platform_id>/addgame/', methods=['GET', 'POST'])
 def addGame(platform_id):
     checkIfUserLoggedIn()
@@ -192,17 +168,10 @@ def addGame(platform_id):
             month = int(input_date[1])
             day = int(input_date[2])
             release_date = datetime.date(year, month, day)
-            newGame = Game(
-                title=request.form['title'],
-                developer=request.form['developer'],
-                publisher=request.form['publisher'],
-                release_date=release_date,
-                platform_id=platform.id,
-                user_id=platform.user_id,
-                multiplayer=request.form['multiplayer'],
-                multiplatform=request.form['multiplatform'],
-                online_multiplayer=request.form['online_multiplayer']
-            )
+            newGame = Game(title=request.form['title'], developer=request.form['developer'], publisher=request.form[
+                            'publisher'], release_date=release_date, platform_id=platform.id, user_id=platform.user_id,
+                            multiplayer = request.form['multiplayer'], multiplatform = request.form['multiplatform'],
+                            online_multiplayer = request.form['online_multiplayer'])
             session.add(newGame)
             session.commit()
             flash('New Game - %s Successfully Created' % (newGame.title))
@@ -213,14 +182,11 @@ def addGame(platform_id):
         flash('You do not have authorization to access this page')
         return redirect(url_for('showPlatforms', platform_id=platform_id))
 
-
-@app.route('/platform/<int:platform_id>/editgame/<int:game_id>/',
-           methods=['GET', 'POST'])
+@app.route('/platform/<int:platform_id>/editgame/<int:game_id>/', methods=['GET', 'POST'])
 def editGame(platform_id, game_id):
     checkIfUserLoggedIn()
     editedGame = session.query(Game).filter_by(id=game_id).one()
-    platform = session.query(Platform).filter_by(
-        id=editedGame.platform_id).one()
+    platform = session.query(Platform).filter_by(id=editedGame.platform_id).one()
     if login_session['user_id'] == platform.user_id:
         if request.method == 'POST':
             input_date = request.form['release_date'].split('-')
@@ -239,48 +205,40 @@ def editGame(platform_id, game_id):
             session.add(editedGame)
             session.commit()
             flash('Game edited successfully')
-            return redirect(url_for('showPlatformLibrary',
-                                    platform_id=platform_id))
-        else:
+            return redirect(url_for('showPlatformLibrary', platform_id=platform_id))
+        else: 
             return render_template('editgame.html', game=editedGame)
     else:
-        return redirect(url_for('showPlatformLibrary',
-                                platform_id=platform_id))
-
+        return redirect(url_for('showPlatformLibrary', platform_id=platform_id))
+            
 # Delete a game
-
-
-@app.route('/platform/<int:platform_id>/deletegame/<int:game_id>/',
-           methods=['GET', 'POST'])
+@app.route('/platform/<int:platform_id>/deletegame/<int:game_id>/', methods=['GET', 'POST'])
 def deleteGame(platform_id, game_id):
     checkIfUserLoggedIn()
     gameToDelete = session.query(Game).filter_by(id=game_id).one()
-    platform = session.query(Platform).filter_by(
-        id=gameToDelete.platform_id).one()
+    platform = session.query(Platform).filter_by(id=gameToDelete.platform_id).one()
     if login_session['user_id'] == platform.user_id:
         if request.method == 'POST':
             session.delete(gameToDelete)
             session.commit()
             flash("Game deleted")
-            return redirect(url_for('showPlatformLibrary',
-                                    platform_id=platform_id))
+            return redirect(url_for('showPlatformLibrary', platform_id=platform_id))
         else:
-            return render_template('deletegame.html', platform_id=platform_id,
-                                   game=gameToDelete)
+            return render_template('deletegame.html', platform_id=platform_id, game=gameToDelete)
     else:
-        return redirect(url_for('showPlatformLibrary',
-                                platform_id=platform_id))
-
+        return redirect(url_for('showPlatformLibrary', platform_id=platform_id))
+            
 
 def checkIfUserLoggedIn():
     if 'username' not in login_session:
         print "username not in login session"
         return redirect('/login')
-
+    
 
 @app.route('/search/')
 def searchDatabase(search_query):
     if 'username' not in login_session:
+        print "username not in login session"
         return redirect('/login')
 
 
@@ -347,8 +305,7 @@ def gconnect():
     stored_access_token = login_session.get('access_token')
     stored_gplus_id = login_session.get('gplus_id')
     if stored_access_token is not None and gplus_id == stored_gplus_id:
-        response = make_response(json.dumps('Current user is \
-                already connected.'),
+        response = make_response(json.dumps('Current user is already connected.'),
                                  200)
         response.headers['Content-Type'] = 'application/json'
         return response
@@ -371,31 +328,30 @@ def gconnect():
     userID = getUserID(login_session['email'])
     print userID
 
-    # if not userID
-    if userID is None:
+    #if not userID
+    if userID == None:
         userID = createUser(login_session)
         print userID
 
     print "login_session['user_id']"
     login_session['user_id'] = userID
 
+    
+
     output = ''
     output += '<h1>Welcome, '
     output += login_session['username']
     output += '!</h1>'
     output += '<img src="'
-    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;\
-            -webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
+    output += ' " style = "width: 300px; height: 300px;border-radius: 150px;-webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
     print "done!"
     return output
 
 # User Helper Functions
 
-
 def createUser(login_session):
-    newUser = User(
-        username=login_session['username'], email=login_session['email'])
+    newUser = User(username=login_session['username'], email=login_session['email'])
     session.add(newUser)
     session.commit()
     user = session.query(User).filter_by(email=login_session['email']).one()
@@ -416,8 +372,6 @@ def getUserID(email):
         return None
 
 # DISCONNECT - Revoke a current user's token and reset their login_session
-
-
 @app.route('/gdisconnect')
 def gdisconnect():
         # Only disconnect a connected user.
@@ -447,6 +401,7 @@ def gdisconnect():
             json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
         return response
+
 
 
 if __name__ == '__main__':

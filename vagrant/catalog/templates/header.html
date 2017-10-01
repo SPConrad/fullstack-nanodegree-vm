@@ -4,7 +4,11 @@
             <span class="glyphicon glyphicon-home" aria-hidden="true"></span>Show All Platforms
         </a>
         <div class="col-md-6 text-right">
-            <a href="/login">Login Here</a>
+            {% if 'username' not in login_session %}
+                <a href="/login">Login Here</a>
+            {% else %}
+                <a href="/logout">Logout</a>
+            {% endif %} 
         </div>
     </div>
 </div>
