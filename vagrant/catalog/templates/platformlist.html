@@ -40,15 +40,16 @@
     <div class="col-md-1"></div>
 </div>
 {% for platform in platforms %}
-    <a href="{{url_for('showPlatformLibrary', platform_id=platform.id)}}">
-        <div class="row">
-            <div class="col-md-1"></div>
-            <div class="col-md-10 platform-list">
+    <div class="row">
+        <div class="col-md-1"></div>
+        <div class="col-md-10 platform-list">
+            <a href="{{url_for('showPlatformLibrary', platform_id=platform.id)}}">
                 <h3>{{platform.name}}</h3>
-            </div>
-            <div class="col-md-1"></div>
+            </a>
+            <h5>{{platform.manufacturer}}</h5>
         </div>
-    </a>
+        <div class="col-md-1"></div>
+    </div>
 {% endfor %}
 
 {% endblock %}

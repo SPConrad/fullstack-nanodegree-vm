@@ -8,8 +8,8 @@
     <div class="row banner menu">
         <div class="col-md-11 col-md-offset-1 padding-none">
             <h1>{{ platform.name }}</h1>
-            <p>{{platform.manufacturer}}</p>
-            <p>{{platform.release_date}}</p>
+            Manufacturer: <p>{{platform.manufacturer}}</p>
+            Release Date: <p>{{platform.release_date}}</p>
             
             <!-- creator stuff goes here -->
     </div>
@@ -60,9 +60,13 @@
                 {% for g in games %}
                     <div class="game">
                         <h3>{{g.title}}</h3>
-                        <p>{{g.developer}}</p>
-                        <p>{{g.publisher}}</p>
-                        <p>{{g.release_date}}</p>
+                        <p>Developer: {{g.developer}}</p>
+                        <p>Publisher: {{g.publisher}}</p>
+                        <p>Release Date: {{g.release_date}}</p>
+                        <p>Genre: {{g.genre}}</p>
+                        <p>Multiplayer: {{g.multiplayer}}</p>
+                        <p>Online Multiplayer: {{g.online_multiplayer}}</p>
+                        <p>Multiplatform: {{g.multiplatform}}</p>
                         <!--on the full list, can add platform here-->
                         <a href="{{url_for('editGame', platform_id=platform.id, game_id=g.id)}}">
                             <button class="btn btn-default" id="new-menu-item">

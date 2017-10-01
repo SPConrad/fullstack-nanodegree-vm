@@ -22,10 +22,31 @@
                     <input type="date" class="form-control" name="releasedate" value="{{game.releasedate}}">
 
                     <label for="developer">Developer:</label>
-                    <input type="developer" class="form-control" name="developer" value="{{game.developer}}">
+                    <input type="text" class="form-control" name="developer" value="{{game.developer}}">
 
                     <label for="publisher">Publisher:</label>
-                    <input type="publisher" class="form-control" name="publisher" value="{{game.publisher}}">
+                    <input type="text" class="form-control" name="publisher" value="{{game.publisher}}">
+
+					<label for="genre">Genre:</label>
+					<input type="text" maxlength="250" class="form-control" name="genre" value="{{game.genre}}">
+
+					<label for="release_date">Release Date</label>
+					<input type="date" class="form-control" name="{{game.release_date}}">
+                   
+					<label for="multiplayer">Multiplayer:</label>
+					<input type="radio" class="form-control" name="multiplayer" value="yes">Yes
+					<input type="radio" class="form-control" name="multiplayer" value="no">No
+					</br>
+
+					<label for="online_multiplayer">Online Multiplayer:</label>
+					<input type="radio" class="form-control" name="online_multiplayer" value="yes">Yes
+					<input type="radio" class="form-control" name="online_multiplayer" value="no">No
+					</br>
+
+					<label for="multiplatform">Multiplatform:</label>
+					<input type="radio" class="form-control" name="multiplatform" value="yes">Yes
+					<input type="radio" class="form-control" name="multiplatform" value="no">No
+					</br>
 					
 					<inptu type="hidden" name="id" value="{{game.id}}">
 					<input type="hidden" name="platform_id" value="{{game.platform_id}}">
