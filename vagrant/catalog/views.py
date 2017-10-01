@@ -84,12 +84,14 @@ def addPlatform():
         return redirect('/login')
     if request.method == 'POST':
         print 'newPlatform'
+        # This could be a lot cleaner
         input_date = request.form['releasedate'].split('-')
         year = int(input_date[0])
         month = int(input_date[1])
-        day = int(input_date[2])
-        
+        day = int(input_date[2])        
         release_date = datetime.date(year, month, day)
+
+        # create the new Platform object
         newPlatform = Platform(
             name= request.form['name'], 
             user_id= login_session['user_id'],
@@ -97,7 +99,11 @@ def addPlatform():
             manufacturer= request.form['manufacturer']
         )
         flash('Creating new platform')
+
+        # Add it to the session
         session.add(newPlatform)
+
+        # and commit it to add it to the database
         session.commit()
         return redirect(url_for('showPlatforms'))
     else:
@@ -112,17 +118,23 @@ def editPlatform(platform_id):
         Platform).filter_by(id=platform_id).one()
     if request.method == 'POST':
         if request.form['name']:
+            input_date = request.form['releasedate'].split('-')
+            year = int(input_date[0])
+            month = int(input_date[1])
+            day = int(input_date[2])        
+            release_date = datetime.date(year, month, day)
             editedPlatform.name = request.form['name']
             editedPlatform.manufacturer = request.form['manufactuer']
-            editedPlatform.releasedate = request.form['releasedate']
+            editedPlatform.releasedate = input_date
             session.add(editedPlatform)
             session.commit()
             flash('Platform successfully edited %s' % editedPlatform.name)
             return redirect(url_for('showPlatforms'))
         else: 
-            return render_template('editPlatform.html', game=editedGame)
+            return render_template('editPlatform.html', game=editedPlatform)
     else:
-        return render_template('editPlatform.html', platform=editedPlatform)
+        flash('Sorry, you do not have the proper permissions to edit that platform')
+        return redirect(url_for('showPlatforms'))
     
 # DELETE PLATFORM
 @app.route('/platform/<int:platform_id>/delete/', methods=['GET', 'POST'])
@@ -131,35 +143,54 @@ def deletePlatform(platform_id):
         return redirect('/login')
     platformToDelete = session.query(
         Platform).filter_by(id=platform_id).one()
-    if login_session['user_id'] == platformToDelete.user_id:   
-        if request.method == 'POST':
-            session.delete(platformToDelete)
-            flash('%s Successfully Deleted' % platformToDelete.name)
-            session.commit()
-            return redirect(url_for('showPlatforms', platform_id=platform_id))
-        else:
-            return render_template('deletePlatform.html', platform=platformToDelete)
+    if request.method == 'POST':
+        if login_session['user_id'] == platformToDelete.user_id:   
+            if request.method == 'POST':
+                session.delete(platformToDelete)
+                flash('%s Successfully Deleted' % platformToDelete.name)
+                session.commit()
+                return redirect(url_for('showPlatforms', platform_id=platform_id))
+            else:
+                return redirect(url_for('showPlatforms', platform_id=platform_id))
     else:
-        return redirect(url_for('showMenu', platform_id=platform_id))
+                return render_template('deletePlatform.html', platform=platformToDelete)
 
 
 
 #@app.route('/addgame/')
-@app.route('/platform/<int:platform_id>/addgame/')
+@app.route('/platform/<int:platform_id>/addgame/', methods=['GET', 'POST'])
 def addGame(platform_id):
+    print "addgame"
     if 'username' not in login_session:
         print "username not in login sessions"
         return redirect('/login')
     platform = session.query(Platform).filter_by(id=platform_id).one()
     if login_session['user_id'] == platform.user_id:
+        print "user_id == platform.user_id"
         if request.method == 'POST':
+            print "method == POST"
+            input_date = request.form['release_date'].split('-')
+            print "split date"
+            year = int(input_date[0])
+            month = int(input_date[1])
+            day = int(input_date[2])
+            print "assign dates"
+            release_date = datetime.date(year, month, day)
+            print "new releasedate var"
             newGame = Game(title=request.form['title'], developer=request.form['developer'], publisher=request.form[
-                            'publisher'], releasedate=request.form['releasedate'], platform_id=platform.id, user_id=platform.user_id)
+                            'publisher'], release_date=release_date, platform_id=platform.id, user_id=platform.user_id,
+                            multiplayer = request.form['multiplayer'], multiplatform = request.form['multiplatform'],
+                            online_multiplayer = request.form['online_multiplayer'])
+            print "create new Game"
             session.add(newGame)
+            print "add new game to session"
             session.commit()
-            flash('New Game - %s Successfully Created' % (newGame.name))
+            print "commit session"
+            flash('New Game - %s Successfully Created' % (newGame.title))
+            print "flash new game, go redirect"
             return redirect(url_for('showPlatforms', platform_id=platform_id))
         else:
+            print "not a POST"
             return render_template('addgame.html', platform_id=platform_id)
     else:
         flash('You do not have authorization to access this page')
@@ -179,6 +210,9 @@ def editGame(platform_id, game_id):
             editedGame.publisher = request.form['publisher']
             #editedGame.releasedate = request.form['releasedate']
             editedGame.platform = request.form['platform_id']
+            editedGame.multiplatform = request.form['multiplatform']
+            editedGame.multiplayer = request.form['multiplayer']
+            editedGame.online_multiplayer = request.form['online_multiplayer']
             session.add(editedGame)
             session.commit()
             flash('Game edited successfully')
@@ -189,6 +223,24 @@ def editGame(platform_id, game_id):
         return redirect(url_for('showPlatformLibrary', platform_id=platform_id))
             
 
+@app.route('/platform/<int:platform_id>/deletegame/<int:game_id>/', methods=['GET', 'POST'])
+def deleteGame(platform_id, game_id):
+    if 'username' not in login_session:
+        print "username not in login session"
+        return redirect('/login')
+    gameToDelete = session.query(Game).filter_by(id=game_id).one()
+    platform = session.query(Platform).filter_by(id=gameToDelete.platform_id).one()
+    if login_session['user_id'] == platform.user_id:
+        if request.method == 'POST':
+            session.delete(gameToDelete)
+            session.commit()
+            flash("Game deleted")
+            return redirect(url_for('showPlatformLibrary', platform_id=platform_id))
+        else:
+            return render_template('deletegame.html', platform_id=platform_id, game=gameToDelete)
+    else:
+        return redirect(url_for('showPlatformLibrary', platform_id=platform_id))
+            
 
 #/catalog/category/sub_category
 #details for that subcategory

@@ -1,5 +1,5 @@
 import random, string, datetime
-from sqlalchemy import Column,Integer,String,Date,ForeignKey
+from sqlalchemy import Column,Integer,String,Date,ForeignKey,Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 from sqlalchemy import create_engine
@@ -59,6 +59,9 @@ class Platform(Base):
     name = Column(String(250), nullable=False)
     release_date = Column(Date)
     manufacturer = Column(String(250))
+    medium = Column(String(250))
+    internet_enabled = Column(Boolean, unique=False, default=False)
+    controller_ports = Column(Integer)
     created = Column(Date, default=_get_date)
     updated = Column(Date, onupdate=_get_date)
     user_id = Column(Integer, ForeignKey('user.id'))
@@ -70,6 +73,8 @@ class Platform(Base):
         return {
         'name' : self.name,
         'id' : self.id,
+        'medium' : self.medium,
+        'controller_ports' : self.controller_ports,
         'release_date' : self.release_date,
         'manufacturer' : self.manufacturer
     }
@@ -82,6 +87,10 @@ class Game(Base):
     release_date = Column(Date)
     developer = Column(String(250))
     publisher = Column(String(250))
+    genre = Column(String(250))
+    multiplayer = Column(Boolean, unique=False, default=False)
+    online_multiplayer = Column(Boolean, unique=False, default=False)
+    multiplatform = Column(Boolean, unique=False, default=False)
     platform_id = Column(String(250), ForeignKey('platform.id'))
     created = Column(Date, default=_get_date)
     updated = Column(Date, onupdate=_get_date)
@@ -94,6 +103,7 @@ class Game(Base):
         return {
         'name' : self.title,
         'id' : self.id,
+        'genre' : self.genre,
         'publisher' : self.publisher,
         'developer' : self.developer,
         'release_date' : self.release_date,

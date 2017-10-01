@@ -11,7 +11,7 @@
 	</div>
 	<div class="row">
 		<div class="col-md-6 col-md-offset-1 padding-top">
-			<form action="#" method="post">
+			<form action="#" method="POST">
 				<div class="form-group">
 
 					<label for="title">Title:</label>
@@ -23,23 +23,27 @@
 					<label for="publisher">Publisher:</label>
 					<input type="text" maxlength="250" class="form-control" name="publisher" placeholder="Game Publisher">
 
-					<label for="releasedate">Release Date</label>
-					<input type="date" class="form-control" name="releasedate">
-                   
-                    
-                    <label for="course">Course:</label>
-                    <!-- 
-                        IF NOT PLATFORM SPECIFIC: 
+					<label for="genre">Genre:</label>
+					<input type="text" maxlength="250" class="form-control" name="genre" placeholder="Game Genre">
 
-                    {% for p in platforms %}
-					<div class="radio">
-					  <label>
-					    <input type="radio" name="platform" id="{{p.id}" value="platform">p.name
-					  </label>
-                    </div>
-                    {% endfor %}
-                    
-                    <input type="hidden" name="platform" value="{{p.id}}">-->
+					<label for="releasedate">Release Date</label>
+					<input type="date" class="form-control" name="release_date">
+                   
+					<label for="multiplayer">Multiplayer:</label>
+					<input type="radio" class="form-control" name="multiplayer" value="yes">Yes
+					<input type="radio" class="form-control" name="multiplayer" value="no">No
+					</br>
+
+					<label for="online_multiplayer">Online Multiplayer:</label>
+					<input type="radio" class="form-control" name="online_multiplayer" value="yes">Yes
+					<input type="radio" class="form-control" name="online_multiplayer" value="no">No
+					</br>
+
+					<label for="multiplatform">Multiplatform:</label>
+					<input type="radio" class="form-control" name="multiplatform" value="yes">Yes
+					<input type="radio" class="form-control" name="multiplatform" value="no">No
+					</br>
+
 					<button type="submit" class="btn btn-default" id="submit" type="submit">
 					<span class="glyphicon glyphicon-glass" aria-hidden="true"></span>Create</button>
 				</div>
