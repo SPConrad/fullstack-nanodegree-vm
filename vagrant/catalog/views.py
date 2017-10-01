@@ -97,13 +97,15 @@ def addPlatform():
         month = int(input_date[1])
         day = int(input_date[2])
         release_date = datetime.date(year, month, day)
-
         # create the new Platform object
         newPlatform = Platform(
-            name=request.form['name'],
-            user_id=login_session['user_id'],
-            release_date=release_date,
-            manufacturer=request.form['manufacturer']
+            name = request.form['name'],
+            user_id = login_session['user_id'],
+            manufacturer = request.form['manufacturer'],
+            medium = request.form['medium'],
+            internet_enabled = request.form['internet_enabled'],
+            controller_ports = request.form['controller_ports'],
+            release_date = release_date
         )
         flash('Creating new platform')
 
@@ -134,7 +136,9 @@ def editPlatform(platform_id):
                 release_date = datetime.date(year, month, day)
                 editedPlatform.name = request.form['name']
                 editedPlatform.manufacturer = request.form['manufactuer']
-                # TODO - ADD OTHER FIELDS
+                editedPlatform.medium = request.form['medium']
+                editedPlatform.online_enabled = request.form['online_enabled']
+                editedPlatform.controller_ports = request.form['controller_ports']
                 editedPlatform.releasedate = release_date
                 session.add(editedPlatform)
                 session.commit()
