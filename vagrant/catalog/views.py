@@ -74,13 +74,7 @@ def showPlatformLibrary(platform_id):
     platform = session.query(Platform).filter_by(id=platform_id).one()
     games = session.query(Game).filter_by(
         platform_id=platform_id).all()
-    # if login_session['user_id'] == platform.user_id:
     return render_template('library.html', games=games, platform=platform)
-    # else:
-    # TODO
-    #     creator = session.query(User).filter_by(id=platform.user_id).one()
-    #     return render_template('publiclibrary.html', games=games,
-    #     platform=platform, creator=creator)
 
 
 # VIEW LIST OF PLATFORMS
@@ -88,8 +82,6 @@ def showPlatformLibrary(platform_id):
 @app.route('/platforms/')
 def showPlatforms():
     platforms = session.query(Platform).all()
-    for item in login_session:
-        print "%s - %s" % (item, login_session[item])
     return render_template('platformlist.html', platforms=platforms)
 
 # ADD A NEW PLATFORM
@@ -99,7 +91,6 @@ def showPlatforms():
 def addPlatform():
     checkIfUserLoggedIn()
     if request.method == 'POST':
-        print 'newPlatform'
         # This could be a lot cleaner
         input_date = request.form['releasedate'].split('-')
         year = int(input_date[0])
@@ -185,33 +176,29 @@ def deletePlatform(platform_id):
 def addGame(platform_id):
     checkIfUserLoggedIn()
     platform = session.query(Platform).filter_by(id=platform_id).one()
-    if login_session['user_id'] == platform.user_id:
-        if request.method == 'POST':
-            input_date = request.form['release_date'].split('-')
-            year = int(input_date[0])
-            month = int(input_date[1])
-            day = int(input_date[2])
-            release_date = datetime.date(year, month, day)
-            newGame = Game(
-                title=request.form['title'],
-                developer=request.form['developer'],
-                publisher=request.form['publisher'],
-                release_date=release_date,
-                platform_id=platform.id,
-                user_id=platform.user_id,
-                multiplayer=request.form['multiplayer'],
-                multiplatform=request.form['multiplatform'],
-                online_multiplayer=request.form['online_multiplayer']
-            )
-            session.add(newGame)
-            session.commit()
-            flash('New Game - %s Successfully Created' % (newGame.title))
-            return redirect(url_for('showPlatforms', platform_id=platform_id))
-        else:
-            return render_template('addgame.html', platform_id=platform_id)
-    else:
-        flash('You do not have authorization to access this page')
+    if request.method == 'POST':
+        input_date = request.form['release_date'].split('-')
+        year = int(input_date[0])
+        month = int(input_date[1])
+        day = int(input_date[2])
+        release_date = datetime.date(year, month, day)
+        newGame = Game(
+            title=request.form['title'],
+            developer=request.form['developer'],
+            publisher=request.form['publisher'],
+            release_date=release_date,
+            platform_id=platform.id,
+            user_id=platform.user_id,
+            multiplayer=request.form['multiplayer'],
+            multiplatform=request.form['multiplatform'],
+            online_multiplayer=request.form['online_multiplayer']
+        )
+        session.add(newGame)
+        session.commit()
+        flash('New Game - %s Successfully Created' % (newGame.title))
         return redirect(url_for('showPlatforms', platform_id=platform_id))
+    else:
+        return render_template('addgame.html', platform_id=platform_id)
 
 
 @app.route('/platform/<int:platform_id>/editgame/<int:game_id>/',
@@ -274,7 +261,6 @@ def deleteGame(platform_id, game_id):
 
 def checkIfUserLoggedIn():
     if 'username' not in login_session:
-        print "username not in login session"
         return redirect('/login')
 
 
@@ -330,7 +316,6 @@ def gconnect():
     # Verify that the access token is used for the intended user.
     gplus_id = credentials.id_token['sub']
     if result['user_id'] != gplus_id:
-        print "result['user_id'] != gplus_id:"
         response = make_response(
             json.dumps("Token's user ID doesn't match given user ID."), 401)
         response.headers['Content-Type'] = 'application/json'
@@ -340,7 +325,6 @@ def gconnect():
     if result['issued_to'] != CLIENT_ID:
         response = make_response(
             json.dumps("Token's client ID does not match app's."), 401)
-        print "Token's client ID does not match app's."
         response.headers['Content-Type'] = 'application/json'
         return response
 
@@ -369,14 +353,11 @@ def gconnect():
 
     # See if a user exists, if it doesn't make a new one
     userID = getUserID(login_session['email'])
-    print userID
 
     # if not userID
     if userID is None:
         userID = createUser(login_session)
-        print userID
 
-    print "login_session['user_id']"
     login_session['user_id'] = userID
 
     output = ''
@@ -387,7 +368,6 @@ def gconnect():
     output += ' " style = "width: 300px; height: 300px;border-radius: 150px;\
             -webkit-border-radius: 150px;-moz-border-radius: 150px;"> '
     flash("you are now logged in as %s" % login_session['username'])
-    print "done!"
     return output
 
 # User Helper Functions
@@ -403,7 +383,6 @@ def createUser(login_session):
 
 
 def getUserInfo(user_id):
-    print 'getUserInfo'
     user = session.query(User).filter_by(id=user_id).one()
     return user
 
@@ -426,7 +405,8 @@ def gdisconnect():
         response = make_response(
             json.dumps('Current user not connected.'), 401)
         response.headers['Content-Type'] = 'application/json'
-        return response
+        flash("Current user not connected")
+        return redirect(url_for('showPlatforms'))
     url = 'https://accounts.google.com/o/oauth2/revoke?token=%s' % access_token
     h = httplib2.Http()
     result = h.request(url, 'GET')[0]
@@ -440,13 +420,15 @@ def gdisconnect():
 
         response = make_response(json.dumps('Successfully disconnected.'), 200)
         response.headers['Content-Type'] = 'application/json'
-        return response
+        flash("Successfully disconnected.")
+        return redirect(url_for('showPlatforms'))
     else:
         # For whatever reason, the given token was invalid.
         response = make_response(
             json.dumps('Failed to revoke token for given user.', 400))
         response.headers['Content-Type'] = 'application/json'
-        return response
+        flash("Failed to revoke token for given user.")
+        return redirect(url_for('showPlatforms'))
 
 
 if __name__ == '__main__':
