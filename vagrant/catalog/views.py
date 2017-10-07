@@ -124,9 +124,9 @@ def addPlatform():
 @app.route('/platform/<int:platform_id>/edit/', methods=['GET', 'POST'])
 def editPlatform(platform_id):
     checkIfUserLoggedIn()
-    editedPlatform = session.query(
+    eP = session.query(
         Platform).filter_by(id=platform_id).one()
-    if login_session['user_id'] == editedPlatform.user_id:
+    if login_session['user_id'] == eP.user_id:
         if request.method == 'POST':
             if request.form['name']:
                 input_date = request.form['releasedate'].split('-')
@@ -134,20 +134,19 @@ def editPlatform(platform_id):
                 month = int(input_date[1])
                 day = int(input_date[2])
                 release_date = datetime.date(year, month, day)
-                editedPlatform.name = request.form['name']
-                editedPlatform.manufacturer = request.form['manufactuer']
-                editedPlatform.medium = request.form['medium']
-                editedPlatform.online_enabled = request.form['online_enabled']
-                editedPlatform.controller_ports =
-                request.form['controller_ports']
-                editedPlatform.releasedate = release_date
-                session.add(editedPlatform)
+                eP.name = request.form['name']
+                eP.manufacturer = request.form['manufactuer']
+                eP.medium = request.form['medium']
+                eP.online_enabled = request.form['online_enabled']
+                eP.controller_ports = request.form['controller_ports']
+                eP.releasedate = release_date
+                session.add(eP)
                 session.commit()
-                flash('Platform successfully edited %s' % editedPlatform.name)
+                flash('Platform successfully edited %s' % eP.name)
                 return redirect(url_for('showPlatforms'))
         else:
             return render_template('editPlatform.html',
-                                   platform=editedPlatform)
+                                   platform=eP)
     else:
         flash('Sorry, you do not have the proper permissions to edit \
                 that platform')

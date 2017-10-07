@@ -34,6 +34,10 @@ Populate the database -
 
 python lotsofgames.py
 
+Run the app
+
+python views.py
+
 Navigate to localhost:5000 to use the app
 
 
