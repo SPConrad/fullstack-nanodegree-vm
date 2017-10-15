@@ -38,7 +38,7 @@ Run the app
 
 python views.py
 
-Navigate to localhost:5000 to use the app
+Navigate to localhost:8000 to use the app
 
 
 
